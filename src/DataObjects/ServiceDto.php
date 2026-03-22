@@ -2,7 +2,6 @@
 
 namespace Combindma\Strapi\DataObjects;
 
-use App\DataTransferObjects\Theme\ResponsiveImageDto;
 use Illuminate\Support\Carbon;
 
 readonly class ServiceDto

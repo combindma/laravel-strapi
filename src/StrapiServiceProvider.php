@@ -13,7 +13,8 @@ class StrapiServiceProvider extends PackageServiceProvider
     {
         $package
             ->name('laravel-strapi')
-            ->hasConfigFile();
+            ->hasConfigFile()
+            ->hasRoute('api');
     }
 
     public function packageRegistered(): void

@@ -2,8 +2,6 @@
 
 namespace Combindma\Strapi\DataObjects;
 
-use App\DataTransferObjects\Theme\ResponsiveImageDto;
-
 readonly class FeatureDto
 {
     public function __construct(
