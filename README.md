@@ -9,6 +9,19 @@
 
 Instead of scattering GraphQL requests across controllers and views, the package centralizes Strapi access behind a small Laravel-friendly API. You can use its ready-made methods for structured content or drop down to the low-level `query()` method when you need to run a custom GraphQL query.
 
+## Table of Contents
+
+- [Installation](#installation)
+- [Usage](#usage)
+- [Cache and Webhooks](#cache-and-webhooks)
+- [Expected Strapi Content Structure](#expected-strapi-content-structure)
+- [Testing](#testing)
+- [Changelog](#changelog)
+- [Contributing](#contributing)
+- [Security Vulnerabilities](#security-vulnerabilities)
+- [Credits](#credits)
+- [License](#license)
+
 ## About Combind Agency
 
 [Combine Agency](https://combind.ma?utm_source=github&utm_medium=banner&utm_campaign=package_name) is a leading web development agency specializing in building innovative and high-performance web applications using modern technologies. Our experienced team of developers, designers, and project managers is dedicated to providing top-notch services tailored to the unique needs of our clients.
@@ -230,6 +243,166 @@ Examples:
 - Updating singleton content such as social links, privacy content, or contact info can clear their single cached keys.
 
 After that, the next request to Laravel loads the updated content from Strapi and stores it in cache again.
+
+## Expected Strapi Content Structure
+
+This package expects your Strapi project to expose specific GraphQL content types and field names. The easiest way to use the package successfully is to keep your Strapi content model aligned with the queries below.
+
+If your content structure differs, you can still use the low-level `query()` method and map the response yourself.
+
+### General rules
+
+- The package expects the Strapi GraphQL API to be enabled.
+- Field names should match exactly, because the package queries them directly.
+- `seo()` and `page()` both read from the `page` GraphQL type by `documentId`.
+- `service()` reads from the `services` GraphQL collection by `slug`.
+- `documentId` is a Strapi system field in Strapi v5, so you do not need to create it manually.
+- For rich content fields such as `content`, this package currently expects a string value. If you use a rich text editor, prefer one that stores HTML output.
+
+### Recommended model overview
+
+Use the following Strapi structure:
+
+- `page` as a collection type
+- `services` as a collection type
+- `social` as a single type
+- `privacy` as a single type
+- `contact` as a single type
+- Reusable components for `seo`, `hero`, `section`, `feature`, and `logos`
+
+### `page` collection type
+
+Used by:
+
+- `seo(string $documentId)`
+- `page(string $documentId)`
+
+Recommended fields on `page`:
+
+| Field | Recommended Strapi field type | Notes |
+| --- | --- | --- |
+| `documentId` | System field | Automatically provided by Strapi v5. |
+| `seo` | Component (single) | Required if you want `seo(string $documentId)` to work, because the package fetches SEO from `page.seo`. Use the reusable `seo` component described below. |
+| `hero` | Component (single) | Use the reusable `hero` component described below. |
+| `sections` | Component (repeatable) | Use the reusable `section` component described below. |
+
+### `social` singleton
+
+Used by:
+
+- `socialNetworks()`
+
+Recommended fields:
+
+| Field | Recommended Strapi field type | Notes |
+| --- | --- | --- |
+| `facebook` | Short text | URL string. |
+| `linkedin` | Short text | URL string. |
+| `instagram` | Short text | URL string. |
+| `twitter` | Short text | URL string. |
+
+### `privacy` singleton
+
+Used by:
+
+- `privacy()`
+
+Recommended fields:
+
+| Field | Recommended Strapi field type | Notes |
+| --- | --- | --- |
+| `content` | Long text or custom rich text field returning HTML | Recommended when you want to render legal or CMS-authored content directly in Laravel views. |
+
+### `contact` singleton
+
+Used by:
+
+- `contactInfos()`
+
+Recommended fields:
+
+| Field | Recommended Strapi field type | Notes |
+| --- | --- | --- |
+| `email` | Short text | You can also use Strapi's `Email` field if you prefer validation in the CMS. |
+| `phone` | Short text | Store formatted phone numbers as strings. |
+| `address` | Long text | Useful for multiline addresses. |
+
+### `services` collection type
+
+Used by:
+
+- `services()`
+- `service(string $slug)`
+
+Recommended fields on each `services` entry:
+
+| Field | Recommended Strapi field type | Notes |
+| --- | --- | --- |
+| `title` | Short text | Main service name. |
+| `slug` | UID | Used by `service(string $slug)`. Make it unique. |
+| `publishedAt` | System field | Automatically provided when Draft & Publish is enabled. |
+| `updatedAt` | System field | Automatically provided by Strapi. |
+| `hero` | Component (single) | Use the reusable `hero` component described below. |
+| `logos` | Component (single) | Use the reusable `logos` component described below. |
+| `sections` | Component (repeatable) | Use the reusable `section` component described below. |
+| `seo` | Component (single) | Use the reusable `seo` component described below. |
+
+### Recommended reusable components
+
+#### `seo` component
+
+| Field | Recommended Strapi field type | Notes |
+| --- | --- | --- |
+| `metaTitle` | Short text | SEO page title. |
+| `metaDescription` | Long text | SEO meta description. |
+| `noIndex` | Boolean | Enables or disables indexing. |
+| `metaImage` | Media (single image) | Open Graph / sharing image. |
+
+#### `hero` component
+
+| Field | Recommended Strapi field type | Notes |
+| --- | --- | --- |
+| `title` | Short text | Main heading. |
+| `label` | Short text | Small supporting label. |
+| `description` | Long text | Introductory copy. |
+| `cta` | Short text | CTA label text. |
+| `image` | Media (single image) | Main hero image. |
+| `video` | Media (single video) | Optional hero video. |
+
+#### `section` component
+
+| Field | Recommended Strapi field type | Notes |
+| --- | --- | --- |
+| `title` | Short text | Section heading. |
+| `label` | Short text | Small supporting label. |
+| `content` | Long text or custom rich text field returning HTML | Best if your editor stores HTML output. |
+| `bgColor` | Short text | Currently queried by the package, so keep the field present even if you only store a hex color. |
+| `image` | Media (single image) | Optional section image. |
+| `video` | Media (single video) | Optional section video. |
+| `features` | Component (repeatable) | Use the reusable `feature` component described below. |
+
+#### `feature` component
+
+| Field | Recommended Strapi field type | Notes |
+| --- | --- | --- |
+| `title` | Short text | Feature heading. |
+| `label` | Short text | Small supporting label. |
+| `description` | Long text | Feature copy. |
+| `width` | Short text | Currently queried by the package, so keep the field present if your layout uses it. |
+| `image` | Media (single image) | Optional feature image. |
+
+#### `logos` component
+
+| Field | Recommended Strapi field type | Notes |
+| --- | --- | --- |
+| `title` | Short text | Optional section heading. |
+| `media` | Component (repeatable) | Create a small repeatable component such as `logo_item` with one `image` field. |
+
+#### `logo_item` component
+
+| Field | Recommended Strapi field type | Notes |
+| --- | --- | --- |
+| `image` | Media (single image) | One client or partner logo. |
 
 ## Testing
 
