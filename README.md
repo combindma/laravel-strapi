@@ -1,11 +1,13 @@
-# This is my package laravel-strapi
+# Laravel Strapi
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/combindma/laravel-strapi.svg?style=flat-square)](https://packagist.org/packages/combindma/laravel-strapi)
 [![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/combindma/laravel-strapi/run-tests.yml?branch=main&label=tests&style=flat-square)](https://github.com/combindma/laravel-strapi/actions?query=workflow%3Arun-tests+branch%3Amain)
 [![GitHub Code Style Action Status](https://img.shields.io/github/actions/workflow/status/combindma/laravel-strapi/fix-php-code-style-issues.yml?branch=main&label=code%20style&style=flat-square)](https://github.com/combindma/laravel-strapi/actions?query=workflow%3A"Fix+PHP+code+style+issues"+branch%3Amain)
 [![Total Downloads](https://img.shields.io/packagist/dt/combindma/laravel-strapi.svg?style=flat-square)](https://packagist.org/packages/combindma/laravel-strapi)
 
-This is where your description should go. Limit it to a paragraph or two. Consider adding a small example.
+`combindma/laravel-strapi` is a Laravel package focused on helping Laravel applications communicate with Strapi v5 through GraphQL.
+
+The package is intended to provide a Laravel-friendly place to configure your Strapi endpoint, manage authentication, and organize GraphQL queries and mutations against your Strapi content API. Its goal is to make Strapi integration feel native inside Laravel projects instead of scattering request logic across the application.
 
 ## About Combind Agency
 
@@ -22,13 +24,6 @@ You can install the package via composer:
 composer require combindma/laravel-strapi
 ```
 
-You can publish and run the migrations with:
-
-```bash
-php artisan vendor:publish --tag="laravel-strapi-migrations"
-php artisan migrate
-```
-
 You can publish the config file with:
 
 ```bash
@@ -39,21 +34,27 @@ This is the contents of the published config file:
 
 ```php
 return [
+    'graphql_url' => env('STRAPI_GRAPHQL_URL'),
+    'token' => env('STRAPI_TOKEN'),
+    'timeout' => (int) env('STRAPI_TIMEOUT', 30),
 ];
 ```
 
-Optionally, you can publish the views using
+Example `.env` values:
 
-```bash
-php artisan vendor:publish --tag="laravel-strapi-views"
+```env
+STRAPI_GRAPHQL_URL=https://your-strapi-domain.com/graphql
+STRAPI_TOKEN=your-strapi-api-token
+STRAPI_TIMEOUT=30
 ```
 
 ## Usage
 
-```php
-$variable = new Combindma\Strapi();
-echo $variable->echoPhrase('Hello, Combindma!');
-```
+This package is being built to act as the GraphQL bridge between Laravel and Strapi v5.
+
+The intended usage is to centralize Strapi connection details and expose a clean API for sending GraphQL queries and mutations from your Laravel application.
+
+Because this package is focused only on GraphQL, using a single `graphql_url` is enough. You do not need to split the configuration into a separate base URL and GraphQL endpoint unless you want that flexibility later.
 
 ## Testing
 
