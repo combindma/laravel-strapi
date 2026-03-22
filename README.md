@@ -209,7 +209,15 @@ Use this Laravel endpoint:
 https://domain.com/strapi/webhook
 ```
 
-Use the same webhook secret you configured in Laravel. The package validates the `Signature` header against `STRAPI_WEBHOOK_SECRET` before clearing cache.
+Use the same webhook secret you configured in Laravel.
+
+In the Strapi webhook headers, add:
+
+```text
+Signature: your-strapi-webhook-secret
+```
+
+The package validates the `Signature` header against `STRAPI_WEBHOOK_SECRET` before clearing cache.
 
 ### 4. What happens when Strapi sends the webhook
 
