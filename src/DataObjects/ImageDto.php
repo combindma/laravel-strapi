@@ -1,6 +1,6 @@
 <?php
 
-namespace App\DataTransferObjects\Theme;
+namespace Combindma\Strapi\DataObjects;
 
 readonly class ImageDto
 {
